@@ -1,0 +1,27 @@
+{
+  "name": "edgarindustries/silverstripe-redirectmiddleware",
+  "description": "SilverStripe 4+ middleware for CMS-managed redirects",
+  "type": "silverstripe-vendormodule",
+  "keywords": ["silverstripe", "redirect", "middleware"],
+  "license": "BSD-3-Clause",
+  "authors": [
+    {
+      "name": "Ed Linklater",
+      "email": "ed@edgar.industries"
+    }
+  ],
+  "require": {
+    "silverstripe/framework": "^4"
+  },
+  "autoload": {
+    "psr-4": {
+      "EdgarIndustries\\RedirectMiddleware\\": "src/",
+      "EdgarIndustries\\RedirectMiddleware\\Tests\\": "tests/"
+    }
+  },
+  "extra": {
+    "expose": [
+      "client"
+    ]
+  }
+}

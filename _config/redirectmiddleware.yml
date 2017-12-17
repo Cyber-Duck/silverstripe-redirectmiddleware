@@ -1,0 +1,14 @@
+---
+Name: redirectmiddleware
+After:
+  - requestprocessors
+---
+SilverStripe\Core\Injector\Injector:
+  Psr\SimpleCache\CacheInterface.redirectMiddlewareCache:
+    factory: SilverStripe\Core\Cache\CacheFactory
+    constructor:
+      namespace: "redirectMiddlewareCache"
+  SilverStripe\Control\Director:
+    properties:
+      Middlewares:
+        RedirectMiddleware: %$NewZealandStory\Middlewares\RedirectMiddleware
