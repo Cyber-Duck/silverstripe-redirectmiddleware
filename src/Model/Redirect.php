@@ -49,7 +49,11 @@ class Redirect extends DataObject implements Flushable
         $redirects = Redirect::get()->filter('Active', true);
         if ($redirects->exists()) {
             foreach ($redirects as $r) {
-                $cache->set(str_replace('/', '^', strtolower($r->FromURL)), $r->getDestination());
+                $val = $r->getDestination();
+                if (!empty($r->Code)) {
+                    $val .= '^' . $r->Code;
+                }
+                $cache->set(str_replace('/', '^', strtolower($r->FromURL)), $val);
             }
         }
     }

@@ -19,10 +19,5 @@
       "EdgarIndustries\\RedirectMiddleware\\": "src/",
       "EdgarIndustries\\RedirectMiddleware\\Tests\\": "tests/"
     }
-  },
-  "extra": {
-    "expose": [
-      "client"
-    ]
   }
 }

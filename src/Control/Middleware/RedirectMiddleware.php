@@ -22,8 +22,10 @@ class RedirectMiddleware implements HTTPMiddleware
         }
 
         if ($cache->has($url)) {
+            $val = explode('^', $cache->get($url));
+
             $response = HTTPResponse::create();
-            $response = $response->redirect($cache->get($url));
+            $response = $response->redirect($val[0], $val[1] ?: 302);
         } else {
             $response = $delegate($request);
         }
