@@ -76,7 +76,7 @@ class Redirect extends DataObject implements Flushable
                 '302' => 'Temporary',
                 '301' => 'Permanent',
             ],
-            $this->Code
+            !empty($this->Code) ? $this->Code : 302
         ));
         $fields->dataFieldByName('FromURL')
             ->setTitle('From (path)')
