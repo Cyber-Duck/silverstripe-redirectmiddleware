@@ -13,6 +13,11 @@ class RedirectMiddleware implements HTTPMiddleware
 {
     public function process(HTTPRequest $request, callable $delegate)
     {
+        if (strpos($request->getURL(), 'dev') === 0) {
+            $response = $delegate($request);
+            return $response;
+        }
+
         $cache = Injector::inst()->get(CacheInterface::class . '.redirectMiddlewareCache');
         $url = str_replace('/', '^', strtolower($request->getURL()));
 
