@@ -18,8 +18,14 @@ class RedirectMiddleware implements HTTPMiddleware
             return $response;
         }
 
+        $reserved_chars = ['{', '}', '(', ')', '/', '\\', '@', ':'];
+
         $cache = Injector::inst()->get(CacheInterface::class . '.redirectMiddlewareCache');
-        $url = str_replace('/', '^', strtolower($request->getURL()));
+        $url = str_replace(
+            $reserved_chars,
+            array_fill(0, count($reserved_chars), '^'),
+            strtolower($request->getURL())
+        );
 
         // Handle homepage
         if ($url == '') {

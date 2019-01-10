@@ -43,6 +43,8 @@ class Redirect extends DataObject implements Flushable
 
     public static function flush()
     {
+        $reserved_chars = ['{', '}', '(', ')', '/', '\\', '@', ':'];
+
         $cache = Injector::inst()->get(CacheInterface::class . '.redirectMiddlewareCache');
         $cache->clear();
 
@@ -53,7 +55,11 @@ class Redirect extends DataObject implements Flushable
                 if (!empty($r->Code)) {
                     $val .= '^' . $r->Code;
                 }
-                $cache->set(str_replace('/', '^', strtolower($r->FromURL)), $val);
+                $cache->set(str_replace(
+                    $reserved_chars,
+                    array_fill(0, count($reserved_chars), '^'),
+                    strtolower($r->FromURL)
+                ), $val);
             }
         }
     }
