@@ -101,6 +101,17 @@ class Redirect extends DataObject implements Flushable
         return $fields;
     }
 
+    public function validate()
+    {
+        $result = parent::validate();
+
+        if (strpos($this->FromURL, 'http:') !== false || strpos($this->FromURL, 'https:') !== false) {
+            $result->addError('From should not be an absolute url.');
+        }
+
+        return $result;
+    }
+
     public function getDestination()
     {
         if ($this->ToPageID > 0) {
