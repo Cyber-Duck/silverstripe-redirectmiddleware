@@ -9,6 +9,7 @@ use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\OptionsetField;
 use SilverStripe\Forms\TextField;
+use SilverStripe\ORM\Connect\DatabaseException;
 use SilverStripe\ORM\DataObject;
 
 class Redirect extends DataObject implements Flushable
@@ -48,19 +49,24 @@ class Redirect extends DataObject implements Flushable
         $cache = Injector::inst()->get(CacheInterface::class . '.redirectMiddlewareCache');
         $cache->clear();
 
-        $redirects = Redirect::get()->filter('Active', true);
-        if ($redirects->exists()) {
-            foreach ($redirects as $r) {
-                $val = $r->getDestination();
-                if (!empty($r->Code)) {
-                    $val .= '^' . $r->Code;
+        try {
+            $redirects = Redirect::get()->filter('Active', true);
+
+            if ($redirects->exists()) {
+                foreach ($redirects as $r) {
+                    $val = $r->getDestination();
+                    if (!empty($r->Code)) {
+                        $val .= '^' . $r->Code;
+                    }
+                    $cache->set(str_replace(
+                        $reserved_chars,
+                        array_fill(0, count($reserved_chars), '^'),
+                        strtolower($r->FromURL)
+                    ), $val);
                 }
-                $cache->set(str_replace(
-                    $reserved_chars,
-                    array_fill(0, count($reserved_chars), '^'),
-                    strtolower($r->FromURL)
-                ), $val);
             }
+        } catch (DatabaseException $e) {
+            return;
         }
     }
 
