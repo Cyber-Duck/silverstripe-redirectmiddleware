@@ -2,7 +2,9 @@
 
 namespace EdgarIndustries\RedirectMiddleware;
 
+use EdgarIndustries\RedirectMiddleware\Model\Redirect;
 use Psr\SimpleCache\CacheInterface;
+use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Control\Middleware\HTTPMiddleware;
 use SilverStripe\Core\Injector\Injector;
@@ -19,48 +21,40 @@ class RedirectMiddleware implements HTTPMiddleware
         }
 
         $reserved_chars = ['{', '}', '(', ')', '/', '\\', '@', ':'];
-
-        $cache = Injector::inst()->get(CacheInterface::class . '.redirectMiddlewareCache');
         $url = str_replace(
             $reserved_chars,
             array_fill(0, count($reserved_chars), '^'),
             strtolower($request->getURL())
         );
 
-        // Handle homepage
-        if ($url == '') {
-            $url = 'home';
-        }
-
-        if ($cache->has($url)) {
-            $val = explode('^', $cache->get($url));
-
-            $response = HTTPResponse::create();
-            $response = $response->redirect($val[0], $val[1] ?: 302);
-        } else {
-            $response = $delegate($request);
-        }
-
-        if ($request->getVar('debug_redirectmiddleware')) {
-            echo '<h1>Debug RedirectMiddleware</h1>';
-
-            echo '<h2>Requested URL</h2>';
-            Debug::dump($request->getURL());
-
-            echo '<h2>Matched cache key</h2>';
-            if ($cache->has($url)) {
-                Debug::dump([$url => $cache->get($url)]);
-            } else {
-                echo 'No match';
+        $redirects = Redirect::get();
+        foreach ($redirects as $redirect) {
+            if (! ((empty($url) && $redirect->FromURL == "home") || $url == $redirect->FromURL)) {
+                continue;
             }
 
-            echo '<h2>Generated Response headers</h2>';
-            Debug::dump($response->getStatusCode());
-            Debug::dump($response->getHeaders());
+            $redirectToPath = $redirect->ToURL;
+            if ($redirect->ToPageID > 0) {
+                $pageSiteTree = SiteTree::get_by_id($redirect->ToPageID);
+                if ($pageSiteTree) {
+                    $redirectToPath = $pageSiteTree->URLSegment;
+                }
+            }
 
-            exit;
+            if (! empty($redirectToPath)) {
+                return $this->buildRedirectResponse($redirectToPath, $redirect->Code);
+            }
         }
 
+        $response = $delegate($request);
+
+        return $response;
+    }
+
+    private function buildRedirectResponse($path, $code)
+    {
+        $response = HTTPResponse::create();
+        $response = $response->redirect($path, $code);
         return $response;
     }
 }
