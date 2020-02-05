@@ -26,14 +26,13 @@ class RedirectMiddleware implements HTTPMiddleware
             array_fill(0, count($reserved_chars), '^'),
             strtolower($request->getURL())
         );
-
+        $url = str_replace('^', '/', $url);
         $redirects = Redirect::get();
         foreach ($redirects as $redirect) {
             if (! ((empty($url) && $redirect->FromURL == "home") || $url == $redirect->FromURL)) {
                 continue;
             }
 
-            $redirectToPath = $redirect->ToURL;
             if ($redirect->ToPageID > 0) {
                 $pageSiteTree = SiteTree::get_by_id($redirect->ToPageID);
                 if ($pageSiteTree) {
@@ -51,10 +50,14 @@ class RedirectMiddleware implements HTTPMiddleware
         return $response;
     }
 
-    private function buildRedirectResponse($path, $code)
+    private function buildRedirectResponse($redirectToPath, $code)
     {
+        if (strpos($redirectToPath, 'http') == false and strpos($redirectToPath, 'www') == false and strpos($redirectToPath, 'ww2') == false
+            and strpos($redirectToPath, '/') == false) {
+            $redirectToPath = '/' . $redirectToPath;
+        }
         $response = HTTPResponse::create();
-        $response = $response->redirect($path, $code);
+        $response = $response->redirect($redirectToPath, $code);
         return $response;
     }
 }
