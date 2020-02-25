@@ -38,6 +38,8 @@ class RedirectMiddleware implements HTTPMiddleware
                 if ($pageSiteTree) {
                     $redirectToPath = $pageSiteTree->URLSegment;
                 }
+            } elseif (! empty($redirect->ToURL)) {
+                $redirectToPath = $redirect->ToURL;
             }
 
             if (! empty($redirectToPath)) {
